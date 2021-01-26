@@ -1,0 +1,89 @@
+---
+title: "Wilcoxon test"
+author: "Bojan Makivic"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+This R code has a function that returns Wilcoxon non-parametric test that simmilar to T-test compare difference between two mean/medians. It is suitable for non-normal distributed data.
+
+### Link
+https://en.wikipedia.org/wiki/Wilcoxon_signed-rank_test
+
+## Libraries
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(dplyr)
+library(rstatix)
+library(ggpubr)
+library(readxl)
+require(data.table)
+library(coin)
+library(plyr)
+```
+
+## Data (NCCTG Lung Cancer Data)
+```{r cancer}
+data <- cancer
+data$status <- gsub("1", "Alive", data$status) # Changing the number "1" to Alive; see ?cancer
+data$status <- gsub("2", "Dead", data$status) # Changing the number "2" to Dead
+```
+
+## Function
+- This function works fine for Wilcoxon rank sum test that is comparing two independent groups of samples, in the situation where the data are not normally distributed.
+
+- First we have to define data frame (db). Second argument (data_1) in the function is a group variable which is in our case column "status" that is containing two groups "Alive" and "Dead". Third argument in the function is continuous data we want to assign to each group (in this case weight loss "wt.loss").
+
+- If you uncomment the commented code you can use this function as One-sample Wilcoxon signed rank test.
+
+```{r}
+W_test <- function(db, data_1, data_2){
+#db %>% get_summary_stats(data_1, type = "mean")
+
+# Box plot
+bxplot<- ggboxplot(
+  db, x = data_1, y = data_2, 
+  ylab = "Weight loss", xlab = "Staus", add = "jitter"
+  )
+
+# Distribution (first parameter)
+hist1<- gghistogram(db, x = data_1, y = "..count..", 
+            fill = "steelblue",bins = 10, stat="count")
+
+# Distribution (second parameter)
+hist2<- gghistogram(db, x = data_2, y = "..density..", 
+            fill = "steelblue",bins = 10, add_density = TRUE)
+
+
+# Computation od statistics
+#stat.test <- db %>%  rstatix::wilcox_test(as.formula(paste(data_1, "~ 1")) , mu = mean(db[[data_2]]), #alternative="two.sided")
+
+stattest <- db %>%  rstatix::wilcox_test(as.formula(paste(data_2, "~", data_1))) %>% add_significance()
+
+# Effect size calculation 
+#eff_size <- db %>%  wilcox_effsize(as.formula(paste(data_1, "~ 1")), mu = mean(db[[data_2]]))
+
+eff_size <- db %>%  wilcox_effsize(as.formula(paste(data_2, "~", data_1)))
+
+#dens <- ggdensity(db, x = "CHO", rug = TRUE, fill = "lightgray") +
+#  scale_x_continuous() +
+#  stat_central_tendency(type = "mean", color = "red", linetype = "dashed") +
+#  geom_vline(xintercept = mean(db[[data_2]]), color = "blue", linetype = "dashed") + 
+#  labs(subtitle = get_test_label(stat.test, detailed = TRUE))
+
+stattest <- stattest %>% add_xy_position(x = data_1)
+bxplot <- bxplot + 
+  stat_pvalue_manual(stattest, tip.length = 0) +
+  labs(subtitle = get_test_label(stattest, detailed = TRUE))
+
+return(list(hist1, hist2,  bxplot, stattest, eff_size))
+}
+```
+
+```{r warning=FALSE}
+W_test(data,"status", "wt.loss")
+```
+
