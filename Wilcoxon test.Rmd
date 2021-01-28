@@ -1,5 +1,5 @@
 ---
-title: "Wilcoxon test"
+title: "Wilcoxon test (function)"
 author: "Bojan Makivic"
 output: html_document
 ---
