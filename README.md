@@ -124,7 +124,7 @@ dat_example <- data.frame(
 - Please add unit tests or reproducible examples for new features.
 
 ## License
-
+MIT License
 
 ## Contact / Author
 Author: [Bojan Makivic] (you can add email or GitHub handle)
