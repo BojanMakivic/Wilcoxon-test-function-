@@ -124,10 +124,9 @@ dat_example <- data.frame(
 - Please add unit tests or reproducible examples for new features.
 
 ## License
-Specify your license here (e.g., MIT, GPL-3). If you don't have one yet, consider adding an explicit LICENSE file.
+
 
 ## Contact / Author
 Author: [Bojan Makivic] (you can add email or GitHub handle)
 Repository: https://github.com/BojanMakivic/Wilcoxon-test-function-
 
-If you want, I can update the README in the repository directly (adding a simple example data file and a short example script) — tell me if you'd like me to push the new README and/or add an example dataset and script.
